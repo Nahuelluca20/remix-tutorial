@@ -1,3 +1,4 @@
+import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import {
   Form,
@@ -11,13 +12,14 @@ import {
   useLoaderData,
   useNavigation,
 } from "@remix-run/react";
-import type { LinksFunction } from "@remix-run/node";
 import appStylesHref from "./app.css";
 
 import { getContacts, createEmptyContact } from "./data";
 
-export const loader = async () => {
-  const contacts = await getContacts();
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const url = new URL(request.url);
+  const q = url.searchParams.get("q");
+  const contacts = await getContacts(q);
   return json({ contacts });
 };
 
@@ -92,7 +94,10 @@ export default function App() {
             )}
           </nav>
         </div>
-        <div id="detail">
+        <div
+          className={navigation.state === "loading" ? "loading" : ""}
+          id="detail"
+        >
           <Outlet />
         </div>
 
