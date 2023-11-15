@@ -1,7 +1,7 @@
-import { json } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
 import {
   Form,
-  Link,
+  NavLink,
   Links,
   LiveReload,
   Meta,
@@ -9,17 +9,22 @@ import {
   Scripts,
   ScrollRestoration,
   useLoaderData,
+  useNavigation,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 import appStylesHref from "./app.css";
 
-import { getContacts } from "./data";
+import { getContacts, createEmptyContact } from "./data";
 
 export const loader = async () => {
   const contacts = await getContacts();
   return json({ contacts });
 };
 
+export const action = async () => {
+  const contact = await createEmptyContact();
+  return redirect(`/contacts/${contact.id}/edit`);
+};
 
 // The links function defines which <link> elements to add to the page when the user visits a route.
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link
@@ -29,6 +34,7 @@ export const links: LinksFunction = () => [
 
 export default function App() {
   const { contacts } = useLoaderData<typeof loader>();
+  const navigation = useNavigation();
 
   return (
     <html lang="en">
@@ -57,11 +63,16 @@ export default function App() {
             </Form>
           </div>
           <nav>
-          {contacts.length ? (
+            {contacts.length ? (
               <ul>
                 {contacts.map((contact) => (
                   <li key={contact.id}>
-                    <Link to={`contacts/${contact.id}`}>
+                    <NavLink
+                      className={({ isActive, isPending }) =>
+                        isActive ? "active" : isPending ? "pending" : ""
+                      }
+                      to={`contacts/${contact.id}`}
+                    >
                       {contact.first || contact.last ? (
                         <>
                           {contact.first} {contact.last}
@@ -69,10 +80,8 @@ export default function App() {
                       ) : (
                         <i>No Name</i>
                       )}{" "}
-                      {contact.favorite ? (
-                        <span>★</span>
-                      ) : null}
-                    </Link>
+                      {contact.favorite ? <span>★</span> : null}
+                    </NavLink>
                   </li>
                 ))}
               </ul>
