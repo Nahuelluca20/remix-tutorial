@@ -6,6 +6,15 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import type { LinksFunction } from "@remix-run/node";
+import appStylesHref from "./app.css";
+
+// The links function defines which <link> elements to add to the page when the user visits a route.
+// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: appStylesHref },
+];
+
 
 export default function App() {
   return (
